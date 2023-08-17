@@ -18,11 +18,15 @@ async function uploadCSV (event, filePath) {
     console.log('Received file path in main process:', filePath); // Add this line
 
     const client = new Client({
-      user: 'santtai',
-      host: 'localhost',
-      database: 'santtai_core',
-      password: 'santtai',
-      port: 5432, // default PostgreSQL port
+      user: '',
+      host: '',
+      database: '',
+      password: '',
+      port: 5432, // default PostgreSQL port,
+      ssl: {
+        sslmode: 'require',
+        rejectUnauthorized: false,
+      }
     });
   
     await client.connect();
