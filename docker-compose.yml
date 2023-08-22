@@ -1,0 +1,14 @@
+version: "3"
+services:
+  react-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.react
+    ports:
+      - "3000:3000"
+  express-app:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.server
+    ports:
+      - "8080:8080"

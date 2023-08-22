@@ -6,7 +6,7 @@ const uploadFile = async (file: File) => {
   const formData = new FormData();
   formData.append("csvFile", file);
 
-  const response = await fetch("http://localhost:3000/upload", {
+  const response = await fetch("http://localhost:8080/upload", {
     method: "POST",
     body: formData,
   });
