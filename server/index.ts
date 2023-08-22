@@ -10,10 +10,10 @@ const upload = multer({ dest: 'uploads/' });
 
 // Database configuration
 const pool = new Pool({
-  user: 'hhwkwaxwlodsqi',
-  host: 'ec2-44-215-22-37.compute-1.amazonaws.com',
-  database: 'd3vv430dpuj285',
-  password: '2fc28221bcc0d0c0d5e4a939049d8cc606e0e058a4ca57ef70cea015efb51190',
+  user: '',
+  host: '',
+  database: '',
+  password: '',
   port: 5432, // Change if necessary
   ssl: {
     rejectUnauthorized: false // This line will fix new error
