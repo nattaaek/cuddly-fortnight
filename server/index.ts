@@ -10,10 +10,10 @@ const upload = multer({ dest: 'uploads/' });
 
 // Database configuration
 const pool = new Pool({
-  user: 'hhwkwaxwlodsqi',
-  host: 'ec2-44-215-22-37.compute-1.amazonaws.com',
-  database: 'd3vv430dpuj285',
-  password: '2fc28221bcc0d0c0d5e4a939049d8cc606e0e058a4ca57ef70cea015efb51190',
+  user: 'irmublqtskmnyc',
+  host: 'ec2-34-236-100-103.compute-1.amazonaws.com',
+  database: 'daim8pmkj3i9p3',
+  password: 'bd1327dc6eb3600d284e5f6bc2cfd48a78c0f689d112bae761a98d509d17813c',
   port: 5432, // Change if necessary
   ssl: {
     rejectUnauthorized: false // This line will fix new error
@@ -36,35 +36,42 @@ app.post('/upload', upload.single('csvFile'), (req: Request, res: Response) => {
     }
 
     const filePath = req.file.path;
+    const allRows: Row[] = [];
 
     fs.createReadStream(filePath)
         .pipe(csvParser())
         .on('data', (row: Row) => {
-            // Insert data into the corresponding table based on the file name
+            allRows.push(row);
+        })
+        .on('end', () => {
             if (!req.file) {
                 res.status(400).send('No file uploaded.');
                 return;
             }
-            const tableName = req.file.originalname.split('.')[0];
-            const query = {
-                text: `INSERT INTO ${tableName} (${Object.keys(row).join(',')}) VALUES (${Object.values(row).map((value, index) => `$${index + 1}`).join(',')})`,
-                values: Object.values(row),
-            };
 
-            pool.query(query)
+            const tableName = req.file.originalname.split('.')[0];
+
+            // Preparing the bulk insert query
+            const columns = Object.keys(allRows[0]).join(',');
+            const values = allRows.map(row => `(${Object.values(row).map(value => `'${value}'`).join(',')})`).join(',');
+
+            const bulkInsertQuery = `INSERT INTO ${tableName} (${columns}) VALUES ${values}`;
+
+            pool.query(bulkInsertQuery)
                 .then(() => {
-                    console.log(`Inserted row into ${tableName}`);
+                    console.log(`Inserted ${allRows.length} rows into ${tableName}`);
+                    res.status(200).send('CSV file uploaded and data inserted into the database.');
                 })
                 .catch((error: Error) => {
-                    console.error(`Error inserting row into ${tableName}:`, error);
+                    console.error(`Error inserting rows into ${tableName}:`, error);
+                    res.status(500).send('Error inserting data into the database.');
+                })
+                .finally(() => {
+                    fs.unlinkSync(filePath); // Remove the uploaded file
                 });
-        })
-        .on('end', () => {
-            fs.unlinkSync(filePath); // Remove the uploaded file
-
-            res.status(200).send('CSV file uploaded and data inserted into the database.');
         });
 });
+
 
 // Start the server
 app.listen(8080, () => {
