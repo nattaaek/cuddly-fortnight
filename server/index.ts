@@ -53,8 +53,10 @@ app.post('/upload', upload.single('csvFile'), (req: Request, res: Response) => {
 
             // Preparing the bulk insert query
             const columns = Object.keys(allRows[0]).join(',');
-            const values = allRows.map(row => `(${Object.values(row).map(value => `'${value}'`).join(',')})`).join(',');
-
+            const values = allRows.map(row => 
+                `(${Object.values(row).map(value => value === '' ? 'NULL' : `'${value.replace(/'/g, "''")}'`).join(',')})`
+            ).join(',');
+            
             const bulkInsertQuery = `INSERT INTO ${tableName} (${columns}) VALUES ${values}`;
 
             pool.query(bulkInsertQuery)
